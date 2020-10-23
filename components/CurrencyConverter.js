@@ -2,25 +2,30 @@
  
 module.exports = {
   metadata: () => ({
-    name: 'CurrencyConverter',
+    name: 'complete.training.CurrencyConverter',
     properties: {
-      human: { required: true, type: 'string' },
+      variable: {required: true,type: 'string'},
+      baseCurrency: {required: true,type: 'string'},
+      targetCurrencies: {required: true,type: 'string'},
+      amount: {required: true,type: 'int'}
     },
-    supportedActions: ['weekday', 'weekend']
+    supportedActions: ['success', 'failure']
   }),
   invoke: (conversation, done) => {
-    // perform conversation tasks.
-    const { human } = conversation.properties();
-    // determine date
-    const now = new Date();
-    const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
-    const isWeekend = [0, 6].indexOf(now.getDay()) > -1;
-    // reply
-    conversation
-      .reply(`Greetings ${human}`)
-      .reply(`Today is ${now.toLocaleDateString()}, a ${dayOfWeek}`)
-      .transition(isWeekend ? 'weekend' : 'weekday');
- 
+
+    const { variable } = conversation.properties();
+    const { baseCurrency } = conversation.properties();
+    const { targetCurrencies } = conversation.properties();
+    const { amount } = conversation.properties();
+    conversation.logger().info("Input parameter values: variable: "+variable+", baseCurrency: "+baseCurrency+", targetCurrencies: "+targetCurrencies+", amount: "+amount);
+    
+    
+    var tmpTargetCurrencies = targetCurrencies+","+baseCurrency;
+    var fixerIoAPIKey = "<replace with your api key>"
+    var reqUrl = "http://data.fixer.io/api/latest?access_key="+fixerIoAPIKey + "&base=EUR&symbols=" + tmpTargetCurrencies;
+    // hide API key from logs
+    conversation.logger().info("fixer.io request URL:"+reqUrl.replace(fixerIoAPIKey,"*********"));
+    
     done();
   }
 };
